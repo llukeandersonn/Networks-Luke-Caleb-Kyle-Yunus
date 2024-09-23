@@ -1,0 +1,40 @@
+%% Preamble stuff needed so that LaTeX can do the right thing
+\documentclass{article}
+\usepackage[a4paper, margin=1in]{geometry}
+\begin{document}
+%% Section enumerating upcoming tasks and task owners for roughly the next 24 hours
+\section*{Next Goals and Deliverables}
+\begin{itemize}
+\item Pulse experiment - Luke/Yunus
+\item Continue NRZ research - Kyle/Caleb
+\item NRZ experiment 1 - TBD
+\item Error detection/correction - Kyle/Caleb
+\end{itemize}
+%% Section enumerating progress from the previous day. Items people were responsible for in the last progress report must appear. Additional tasks that the group agreed to add since the last progress report may be presented here.
+\section*{Previous Goals and Deliverables}
+\begin{itemize}
+\item Setup private github repo (DONE) - Luke (llukeandersonn/Networks-Luke-Caleb-Kyle-Yunus)
+\item Commit README.md with practices (DONE) - Day 1 team meeting, edit by Yunus
+\item HW Pin Mapping (DONE) - Luke (NICport-cable-GPIO.csv)
+\item Research NRZ encoding (partial) - bibtex additions by Kyle (bib.tex)
+\item Research error detection (partial) - Kyle performed preliminary research (added to bib.tex)
+\item Progress report 1 - uploaded to GitHub by Yunus (Day1.tex)
+\end{itemize}
+%% Sections above should be short bullets. Longer free form discussion of information from above goes here. These should still be short! More that a couple sentences and the discussion is better suited as a results write-up, appendix, or design document.
+\section*{Discussion}
+\begin{itemize}
+\item Pin Mapping - Using the NIC 4port schematic and GPIO Pinout diagram, we mapped the power, ground, and ports for both transmission and reception. Cable pins were tracked for their type of signal and the corresponding GPIO pin number.
+\item Initial investigation into error detection requires bits... not sure how to
+send even a single bit yet, so this research has been deferred. This may be a
+mistake since we'll need to know this shortly after bits start being sent (the NICs
+are known to suffer from substantial noise/crosstalk).
+\item Pulse experiment - Using a single node toggle tx on/off. Verify that rx
+matches tx and generate some timing estimates for how fast toggling can be
+detected. Will commit code and short results write up to repo; should give a sense of an upperbound on bps.
+\item Continue NRZ research - will probably learn how to use NRZ Inversion encoding to transmit signals using an added 0 bit add the beginning to make 5 bit sequences. Need to produce pseudocode soon.
+\item NRZ Experiment 1 - Produce and commit C code that tries to send/recv 4 bit patterns using a single node. This will build on the understanding gained implementing the Pulse Experiment. Will try to get to running the experiment today but expect this won't be ready/able to be run until tomorrow.
+\item Continue Error Detection Research - on different error detection algorithms for the transmitter and receiver. Will probably start out with a single bit error detection system and build up to multi-bit detection.
+\end{itemize}
+%% The appendix pages go here if there are any...
+%\section*{Appendix}
+\end{document}
