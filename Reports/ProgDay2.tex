@@ -1,0 +1,34 @@
+%% Preamble stuff needed so that LaTeX can do the right thing
+\documentclass{article}
+\usepackage[a4paper, margin=1in]{geometry}
+\begin{document}
+%% Section enumerating upcoming tasks and task owners for roughly the next 24 hours
+\section*{Next Goals and Deliverables}
+\begin{itemize}
+\item Research on NRZ inversion encoding and experiment - Kyle/Caleb
+\item NRZ experiment 1 - Luke
+\item Error detection/correction research- Yunus
+\item Speed experiment - Luke
+\end{itemize}
+%% Section enumerating progress from the previous day. Items people were responsible for in the last progress report must appear. Additional tasks that the group agreed to add since the last progress report may be presented here.
+\section*{Previous Goals and Deliverables}
+\begin{itemize}
+\item Pulse experiment (DONE) - Luke/Yunus/Caleb/Kyle 
+\item Continued NRZ research (partial) - Kyle/Caleb
+\item Progress report 2 (DONE) - uploaded to GitHub by Luke (ProgDay2.tex)
+\item Uploading Code to GitHub (DONE) - Luke 
+\item Edited pin mapping (DONE) - Luke/Caleb
+\item Team Name CLYK (DONE) - Luke/Yunus/Caleb/Kyle 
+\end{itemize}
+%% Sections above should be short bullets. Longer free form discussion of information from above goes here. These should still be short! More that a couple sentences and the discussion is better suited as a results write-up, appendix, or design document.
+\section*{Discussion}
+\begin{itemize}
+\item Pulse Experiment - First we had to figure out the basics of getting C code to work using the Raspberry Pi computer, since as stated the GCC was unfriendly and gave us some trouble to begin with. Once we had that figured out we read Pigpio documentation to be able to use it when interacting with the LEDs. We started by just turning on one LED that we figured out the GPIO number of, then tested out how fast we could get it to blink with increasingly reduced sleep times. Afterward, to figure out the corresponding GPIO numbers to the other LEDs we used loops and print statements. We need to conduct further research and experimentation to find the highest bitrate possible with this equipment. We also configured an experiment to ensure we could light the receiving LEDs by toggling a transmitter. Sleeping 0.05 seconds between toggles worked with easily distinguishable lights, while 0.0125 seconds created an apparent strobing effect to the human eye. There's concern about potential noise at this speed, but our further research into non-zero return should help iron this out.
+\item Continued NRZ research - Need to do research on what the NRZ experiment will look like. Encode data send data un-encode data? what does this code look like?
+\item NRZ experiment 1 - Perform a experiment sending bits using a simple non return to zero encoding.
+\item Error detection/correction - continued research on different error catching algorithms.
+
+\end{itemize}
+%% The appendix pages go here if there are any...
+%\section*{Appendix}
+\end{document}
