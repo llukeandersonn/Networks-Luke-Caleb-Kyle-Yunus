@@ -14,13 +14,14 @@ int main(int argc, char *argv[]){
     //gpioInitialise();
     int start = pigpio_start(NULL, NULL);
     while (1){
+        //one second intervals for pulsation
         gpio_write(start, 27, 1);
         time_sleep(1);
         gpio_write(start, 27, 0);
         time_sleep(1);
-        gpio_write(start, 2, 1);
+        gpio_write(start, 21, 1);
         time_sleep(1);
-        gpio_write(start, 2, 0);
+        gpio_write(start, 21, 0);
         time_sleep(1);
     }
     //gpioTerminate();
