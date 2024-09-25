@@ -11,27 +11,36 @@
 
 void sendFunction(int bits[], int sObits)
 {
+    int pi = pigpio_start(NULL, NULL);
+    set_mode(pi, 23, PI_OUTPUT);   
+    for(int loop = 0; loop < 10; loop++){
+      printf("%d ", bits[loop]);
+    }
+
 
     for (int i = 0; i < sObits; i++)
     {
-        if (bits[i] = 1)
+         printf("found bit %d", i);
+        if (bits[i] == 1)
         {
-            int pi = pigpio_start(NULL, NULL);
+        printf("bit is a %d", bits[i]);
+    
             int state = gpio_read(pi, 23);
-            if (state = 1)
+            if (state == 1)
             {
+                printf("writing");
                 gpio_write(pi, 23, 0);
-                sleep(0.5);
+                time_sleep(0.5);
             }
             else
             {
                 gpio_write(pi, 23, 1);
-                sleep(0.5);
+                time_sleep(0.5);
             }
         }
-        else if (bits[i] = 0)
+        else if (bits[i] == 0)
         {
-            sleep(0.5);
+            time_sleep(0.5);
         }
     }
 }
