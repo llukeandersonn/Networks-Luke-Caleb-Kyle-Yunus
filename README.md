@@ -5,3 +5,6 @@ Agreed upon processes for repo / group (branching/merging, directories, work hou
 - Communication Methods (phones) with 24 hour response times
 - Possible Directories: Test code directory, main directory
 - Can find progress reports in the "Reports" folder
+- Regular Signals file to set all to high then low
+- NonWorkingTests folder for works in progress and experimentation that isn't quite there yet
+- Experiments with their own named folders (like pulse experiment) that have been completed/doing well in progress
