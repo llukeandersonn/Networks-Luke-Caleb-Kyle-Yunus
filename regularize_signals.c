@@ -43,7 +43,7 @@ int main(int argc, char *argv[]){
     gpio_write(pi, 24, 0);
     gpio_write(pi, 21, 0);
     gpio_write(pi, 20, 0);
-    printf("Signals regularized!");
+    printf("Signals regularized!\n");
     pigpio_stop(pi);
 
 }
