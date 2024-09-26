@@ -1,0 +1,32 @@
+%% Preamble stuff needed so that LaTeX can do the right thing
+\documentclass{article}
+\usepackage[a4paper, margin=1in]{geometry}
+\begin{document}
+%% Section enumerating upcoming tasks and task owners for roughly the next 24 hours
+\section*{Next Goals and Deliverables}
+\begin{itemize}
+\item Send \& Read bits - Completed 2 bit trial today, 8 will come tomorrow - CLYK
+\item Choose between a base NRZ encoding method or an inversion such as Manchester encoding - CLYK
+\item Complete NRZ encoding experimentation - CLYK
+\end{itemize}
+%% Section enumerating progress from the previous day. Items people were responsible for in the last progress report must appear. Additional tasks that the group agreed to add since the last progress report may be presented here.
+\section*{Previous Goals and Deliverables}
+\begin{itemize}
+\item Research on NRZ inversion encoding and experiment - Kyle/Caleb
+\item NRZ experiment 1 - Caleb/Yunus (in progress)
+\item Speed experiment (CP341 Networks NIC Cable GPIO Mapping UPDATED day 3 - Sheet1.csv, /Pulse Experiment/test3day3.c) - Luke (DONE)
+\item New folder for work-in-progress experiment code added to github along with updated ReadMe - Yunus (DONE)
+\item Set all transmitters/receivers to high followed by low (regularize\_signals.c) - Luke (DONE)
+\end{itemize}
+%% Sections above should be short bullets. Longer free form discussion of information from above goes here. These should still be short! More that a couple sentences and the discussion is better suited as a results write-up, appendix, or design document.
+\section*{Discussion}
+\begin{itemize}
+\item Research on NRZ inversion encoding - Looking up possible different alternatives to the base NRZ encoding method such as Manchester encoding. 
+\item NRZ/Pulse experiment 1 - Coupled an NRZ and pulse experiment together by connecting a cable from two ports to transmit multiple bits in a sequence. Continuing to iron out discrepancies in reads caused by seemingly random starting positions, but the code we create by tomorrow should solve this.
+\item Speed experiment - Using the clock() function built into C, we timed the reading and writing speeds of the transmitters for a single bit. Write time took 0.134 ms on average over its 8 trials while reading took .0160 ms. These add up to 0.294 total ms to read and write a single bit. These rates mean we can perform 7476 writes, 6259 reads, or 3407 reads and writes of one bit in a second.
+\item Set all transmitters/receivers to high followed by low - This code was fairly straightforward once we were able to toggle each of the lights. This ensures that any random values initialized in a transmitter or receiver is regularized to zero.
+
+\end{itemize}
+%% The appendix pages go here if there are any...
+%\section*{Appendix}
+\end{document}
