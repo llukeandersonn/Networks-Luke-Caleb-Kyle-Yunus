@@ -1,0 +1,39 @@
+%% Preamble stuff needed so that LaTeX can do the right thing
+\documentclass{article}
+\usepackage[a4paper, margin=1in]{geometry}
+\begin{document}
+%% Section enumerating upcoming tasks and task owners for roughly the next 24 hours
+\section*{Next Goals and Deliverables}
+\begin{itemize}
+\item Prompt user using stdin to change the message transmitted - Luke
+\item Send characters more complex than a single bit - CLYK
+\item Separately implement an error detection to go along with the Manchester encoding (parity bit) - CLYK
+\item Continue looking into usage and functions of UART to determine if its worth utilizing - CLYK
+\item Research waves and pulses to use in conjunction with bb\_serial\_read() - CLYK
+
+\end{itemize}
+%% Section enumerating progress from the previous day. Items people were responsible for in the last progress report must appear. Additional tasks that the group agreed to add since the last progress report may be presented here. 
+\section*{Previous Goals and Deliverables}
+\begin{itemize}
+\item Send \& Read bits - Completed 15 bit trial today - CLYK (DONE) (NRZ Encoding/day4.1.c)
+\item Choose between a base NRZ encoding method or another option such as UART - CLYK (DONE)
+\item Complete NRZ encoding experimentation - CLYK (DONE) (NRZ Encoding/day4.1.c, day4.2.c)
+\item Begin testing UART - Yunus, Kyle, Luke (DONE) (NonWorkingTests/uart\_test.c)
+\item Submit Progress Update - Caleb (DONE) (Reports/ProgDay4.tex)
+\end{itemize}
+%% Sections above should be short bullets. Longer free form discussion of information from above goes here. These should still be short! More that a couple sentences and the discussion is better suited as a results write-up, appendix, or design document.
+\section*{Discussion}
+\begin{itemize}
+\item Send \& Read bits - sending up to 15 bits between machines using NRZ encoding has been proven possible, though timing shifts bring difficulty. This is leading us into the direction of Manchester encoding in order to encode timing information.
+\item Choose between encoding method - After implementing an NRZ encoding, it's apparent that Manchester encoding would be beneficial to synchronize the transmission and reception of bits. Appendix includes in-depth documentation of this encoding and potential implementation in C, and Stuart has suggested we investigate the callback function in the PiGPIO library. However, after reading the paper from Behenna, Hunter, Moore, and Triplett, the Universal Asynchronous Receiver-Transmitter (UART) functionality present in GPIO pins 14 and 15 may be more straightforward. We will proceed with the latter encoding system.
+\item Complete NRZ encoding experimentation - NRZ encoding is functional in our implementation, but the timing issue desperately needs solved. Reiterating from above, we're moving toward either Manchester or UART encoding. Chapell, Hannebert, and Mastromarino point to Manchester, a sync signal, and pigpio library transmission, while the authors of the other paper mention Universal Asynchronous Receiver-Transmitter (UART). We're attempting to implement UART using the second reference below.
+\item Begin testing UART - Implemented rudimentary wave signaling, none of us understand it well enough yet to complete this.
+
+\end{itemize}
+%% The appendix pages go here if there are any...
+\section*{Appendix}
+\begin{itemize}
+\item https://ww1.microchip.com/downloads/en/Appnotes/Atmel-9164-Manchester-Coding-Basics\_Application-Note.pdf
+\item https://raspberry-projects.com/pi/programming-in-c/uart-serial-port/using-the-uart
+\end{itemize}
+\end{document}
