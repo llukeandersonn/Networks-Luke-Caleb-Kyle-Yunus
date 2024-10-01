@@ -1,0 +1,40 @@
+%% Preamble stuff needed so that LaTeX can do the right thing
+\documentclass{article}
+\usepackage[a4paper, margin=1in]{geometry}
+\begin{document}
+%% Section enumerating upcoming tasks and task owners for roughly the next 24 hours
+\section*{Next Goals and Deliverables}
+\begin{itemize}
+\item Finish implementing bit decoding - CLYK
+\item Test simultaneous transmission and reception with the added decoding - CLYK
+\item Re-implement user prompting for messages - CLYK
+
+\end{itemize}
+%% Section enumerating progress from the previous day. Items people were responsible for in the last progress report must appear. Additional tasks that the group agreed to add since the last progress report may be presented here. 
+\section*{Previous Goals and Deliverables}
+\begin{itemize}
+\item Fix receiver decoding - CLYK (in-progress) (WavesRxTx/Idek2.c)
+
+\item Compile code for two-way transmission and reception - CLYK (in-progress) (WavesRxTx/Idek.c, Idekpty.c)
+
+\item Implement Delta Tick Timing - CLYK (DONE) (WavesRxTx/Idek.c)
+
+\item Fix and properly implement Manchester Encoding - CLYK (in-progress) (WavesRxTx/Idek.c)
+
+\item Submit Progress Update - (DONE) (Reports/ProgDay6.tex)
+\end{itemize}
+%% Sections above should be short bullets. Longer free form discussion of information from above goes here. These should still be short! More that a couple sentences and the discussion is better suited as a results write-up, appendix, or design document.
+\section*{Discussion}
+\begin{itemize}
+\item Fix receiver decoding - Our functions were reading continuously and only finding "0101" and "1010". We now need to decode our valid bit transmissions given the Manchester Encoding they're converted into.
+
+\item Compile code for two-way transmission and reception - Both computers are able to simultaneously transmit and receive, though the decoding needs some work.
+
+\item Implement Delta Tick Timing - Using the gpio\_state\_change\_callback, we now check for how many ticks have passed since the previous valid bit reception. This allows us to ignore transitions which aren't actually bits being sent.
+\item Fix and properly implement Manchester Encoding - Synchronizing timing is successful for 20 bits, while we get 6-7 invalid reads from transitions outside of our delta T. Implementing tick checks has greatly improved our accuracy of reception. We are doing transmission and reception bitwise at this stage, but implementing waves again may help our cause.
+
+\end{itemize}
+%% The appendix pages go here if there are any...
+%\section*{Appendix}
+
+\end{document}
