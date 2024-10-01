@@ -1,0 +1,43 @@
+%% Preamble stuff needed so that LaTeX can do the right thing
+\documentclass{article}
+\usepackage[a4paper, margin=1in]{geometry}
+\begin{document}
+%% Section enumerating upcoming tasks and task owners for roughly the next 24 hours
+\section*{Next Goals and Deliverables}
+\begin{itemize}
+\item Prompt user multiple times for input - CLYK
+\item Read multiple transmissions one after another - CLYK
+\item Remove leading 1 from C12 - CLYK
+\item Complete parity bit error detection - CLYK
+\item Lock threads with Mutex - CLYK
+
+\end{itemize}
+%% Section enumerating progress from the previous day. Items people were responsible for in the last progress report must appear. Additional tasks that the group agreed to add since the last progress report may be presented here. 
+\section*{Previous Goals and Deliverables}
+\begin{itemize}
+\item Finish implementing bit decoding - CLYK (DONE)
+\item Test simultaneous transmission and reception with the added decoding - CLYK (DONE)
+\item Re-implement user prompting for messages - CLYK (DONE) (WavesRxTx/Day7C12.c)
+\item Handle Error Detection using a Parity Bit - CLYK (in-progress)
+
+\item Submit Progress Update - (DONE) (Reports/ProgDay7.tex)
+\end{itemize}
+%% Sections above should be short bullets. Longer free form discussion of information from above goes here. These should still be short! More that a couple sentences and the discussion is better suited as a results write-up, appendix, or design document.
+\section*{Discussion}
+\begin{itemize}
+\item Finish implementing bit decoding - We're now able to place all of the bits into an array and print them out. There's not yet a byte-sized character encoding implementation, this is our next step after Error Detection is active.
+
+\item Test simultaneous transmission and reception with the added decoding - Both machines are able to transmit and receive at the same time using separate threads. One machine receives a leading 1 which is out of place. The other machine receives an accurate message.
+
+\item Re-implement user prompting for messages - The user of C12 is able to successfully send 16 bits which all make it to the C11 machine.
+
+\item Handle Error Detection using a Parity Bit - This step is presently being held up by a leading 1 received by one machine each time simultaneous transmission and reception occur. Only one machine is impacted by it, we're looking into locking threads with Mutex in order to solve this.
+
+\end{itemize}
+%% The appendix pages go here if there are any...
+\section*{Appendix}
+\begin{itemize}
+\item Mutex https://www.geeksforgeeks.org/mutex-lock-for-linux-thread-synchronization/
+\end{itemize}
+
+\end{document}
