@@ -223,7 +223,7 @@ int main(int argc, char *argv[]) {
     	scanf("%d", &userInput[i]);
     }
     //loop through userInput and look for a 2
-    for(k=0; k<sizeof(userInput); k++) {
+    for(int k=0; k<sizeof(userInput); k++) {
         if(userInput[k] == 2){
             stop_thread(&listener_thread);
             return 0;
