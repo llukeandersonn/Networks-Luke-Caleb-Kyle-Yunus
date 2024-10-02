@@ -216,7 +216,19 @@ int main(int argc, char *argv[]) {
    
     int head[] = {1, 0, 1, 0};   // Header for synchronization
     int biit[] = {1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0};  // Message to be sent
-
+    int userInput[17]; //initialize input array
+    while(1){
+    printf("Enter your desired bits (16 required), place a 2 to stop. \n"); //prompt user
+    for(int i = 0; i < 16; i++){ //loop through each element of array, update with applicable bit
+    	scanf("%d", &userInput[i]);
+    }
+    //loop through userInput and look for a 2
+    for(k=0; k<sizeof(userInput); k++) {
+        if(userInput[k] == 2){
+            stop_thread(&listener_thread);
+            return 0;
+        }
+    }
     int sOhead = sizeof(head) / sizeof(head[0]);
     int sObits = sizeof(biit) / sizeof(biit[0]);
     time_sleep(2);
@@ -239,5 +251,6 @@ int main(int argc, char *argv[]) {
     }
     printf("\n");
     check_parity_bit(bit_ptr, sOmess);
-    return 0;
+    }
+
 }
