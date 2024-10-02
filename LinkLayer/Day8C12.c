@@ -222,6 +222,13 @@ int main(int argc, char *argv[]) {
     for(int i = 0; i < 16; i++){ //loop through each element of array, update with applicable bit
     	scanf("%d", &userInput[i]);
     }
+    //loop through userInput and look for a 2
+    for(int k=0; k<sizeof(userInput); k++) {
+        if(userInput[k] == 2){
+            stop_thread(&listener_thread);
+            return 0;
+        }
+    }
     int sOhead = sizeof(head) / sizeof(head[0]);
     int sObits = sizeof(biit) / sizeof(biit[0]);
     int sOinput = sizeof(userInput) / sizeof(userInput[0]);
