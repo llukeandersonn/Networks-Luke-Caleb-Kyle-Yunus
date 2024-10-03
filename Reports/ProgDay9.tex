@@ -1,0 +1,45 @@
+%% Preamble stuff needed so that LaTeX can do the right thing
+\documentclass{article}
+\usepackage[a4paper, margin=1in]{geometry}
+\begin{document}
+%% Section enumerating upcoming tasks and task owners for roughly the next 24 hours
+\section*{Next Goals and Deliverables}
+\begin{itemize}
+\item Decide on a pathfinding algorithm to move forward with. - CLYK
+\item Implement pathfinding algorithm. - CLYK
+\item Implement a continuous listening loop that will allow for more than one message. -CLYK
+\item Continued research on sending packets. -CLYK
+
+\end{itemize}
+%% Section enumerating progress from the previous day. Items people were responsible for in the last progress report must appear. Additional tasks that the group agreed to add since the last progress report may be presented here.
+\section*{Previous Goals and Deliverables}
+\begin{itemize}
+
+\item Read Multiple Transmissions one After Another - CLYK (in-progress)
+\item Implement Character Decoding - CLYK (DONE)
+\item Research Pathfinding Algorithms for Network (OSPF, DVR) - CLYK (in-progress)
+\item Research Addressing Protocols - CLYK (in-progress)
+\item Research on Sending Packets - CLYK (in-progress)
+\item Encode Characters into bits - Kyle  (DONE) (LinkLayer/lettuce.c)
+\item Submit Progress Update - (DONE) (Reports/ProgDay9.tex)
+\end{itemize}
+%% Sections above should be short bullets. Longer free form discussion of information from above goes here. These should still be short! More that a couple sentences and the discussion is better suited as a results write-up, appendix, or design document.
+\section*{Discussion}
+\begin{itemize}
+\item Read Multiple Transmissions one After Another - Resetting our bit counter after receiving a trailer following the message has made subsequent transmissions and receptions possible.
+\item Implement Character Decoding - We had some trouble yesterday with a mix up on our files and some loss of progress on the encoding characters into bits parts. We looked at our files again did some organizing and made it so that we had recovered our lost progress and have the code to decode the binary output from converting character user inputs. We now integrated that and can receive character messages.
+\item Research Pathfinding Algorithms for Network (OSPF, DVR) - From our research, particularly reading the papers, we have been looking at DVR as a possible algorithm to move forward with, but need to do more research and an analysis with consideration towards the current state of our code. 
+\item Research Addressing Protocols (CIDR) - CIDR certainly seems to be the addressing protocol to use for a network even at our scale, further research to come.
+\item Research on Sending Packets - Since we haven't quite yet gotten to a finishing point on the link layer yet this has been deferred for now, but likely will go with some scaled version of what we do between the 2 pis now. 
+\item Encode Characters into bits - After resolving another error in our transmission (which resulted in only working on test cases starting in '1'), we were able to successfully implement character encoding. 
+
+\end{itemize}
+%% The appendix pages go here if there are any...
+\section*{Appendix}
+\begin{itemize}
+\item OSPF https://en.wikipedia.org/wiki/Open\_Shortest\_Path\_First
+\item DVR https://www.geeksforgeeks.org/distance-vector-routing-dvr-protocol/
+\item CIDR https://en.wikipedia.org/wiki/Classless\_Inter-Domain\_Routing
+\end{itemize}
+
+\end{document}
