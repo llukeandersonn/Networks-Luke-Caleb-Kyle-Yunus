@@ -245,6 +245,6 @@ int main(int argc, char *argv[]) {
       printf("%d ", bits[loop]);
     }
     printf("\n");
-//    check_parity_bit(bit_ptr, sOmess);
+    check_parity_bit(bit_ptr, sOmess);
     return 0;
 }
