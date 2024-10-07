@@ -1,0 +1,43 @@
+%% Preamble stuff needed so that LaTeX can do the right thing
+\documentclass{article}
+\usepackage[a4paper, margin=1in]{geometry}
+\begin{document}
+%% Section enumerating upcoming tasks and task owners for roughly the next 24 hours
+\section*{Next Goals and Deliverables}
+\begin{itemize}
+\item Implementation of pathway finding algorithm - CLYK
+\item Adding a 3rd or even 4th pi to the testing equations? - CLYK
+\item Reformat our header and allocation calls to resize based on the incoming message - CLYK
+
+\end{itemize}
+%% Section enumerating progress from the previous day. Items people were responsible for in the last progress report must appear. Additional tasks that the group agreed to add since the last progress report may be presented here.
+\section*{Previous Goals and Deliverables}
+\begin{itemize}
+\item Read Multiple Transmissions one After Another - CLYK (DONE)
+\item Research Pathfinding Algorithms for Network (OSPF, DVR) - CLYK (in-progress)
+\item Research Addressing Protocols - CLYK (in-progress)
+\item Research on Sending Packets - CLYK (in-progress)
+\item Decide on a pathfinding algorithm to move forward with. - CLYK
+\item Implement pathfinding algorithm. - CLYK
+\item Implement a continuous listening loop that will allow for more than one message. - CLYK (DONE)
+\item Continued research on sending packets. -CLYK (Reports/ProgDay10.tex)
+\end{itemize}
+%% Sections above should be short bullets. Longer free form discussion of information from above goes here. These should still be short! More that a couple sentences and the discussion is better suited as a results write-up, appendix, or design document.
+\section*{Discussion}
+\begin{itemize}
+\item Read Multiple Transmissions one After Another - Dealing with this led us to difficulties in memory allocation. We tried a couple different ways of going about this which took us a while, we tried a while loop then threads then we went back to the while loop. We tried properly using malloc but we struggled to figure out some of the errors that came along in the implementation. 
+\item Research Pathfinding Algorithms for Network (OSPF, DVR) - DVR seems best suited for our program as well as the guidance from the paper seems pretty helpful. 
+\item Decide on a pathfinding algorithm to move forward with. - Most likely planning on going with DVR due to its usage in the paper which we have been using as guidance for certain parts. Time will tell if we still stick with it or not. 
+\item Implement pathfinding algorithm. - Running into some previously unadresses issues related to memory allocation that are inhibiting our ability to get to this step. 
+\item Implement a continuous listening loop that will allow for more than one message. - After setting up a pthread to our listen function, simply leaving the program running and resetting the bit counter was all it took to read in multiple messages.
+\item Continued research on sending packets. - Message length should be encoded in the header so we can allocate enough memory, right now we have a static header format which makes it difficult to allocate the correct amount of memory.
+
+\end{itemize}
+%% The appendix pages go here if there are any...
+\section*{Appendix}
+\begin{itemize}
+\item OSPF https://en.wikipedia.org/wiki/Open\_Shortest\_Path\_First
+\item DVR https://www.geeksforgeeks.org/distance-vector-routing-dvr-protocol/
+\item CIDR https://en.wikipedia.org/wiki/Classless\_Inter-Domain\_Routing
+\end{itemize}
+\end{document}
