@@ -8,7 +8,8 @@
 #include <time.h>
 #include <pthread.h>
 #include "pigpiod_if2.h"
-
+#include <stdlib.h>
+#include <stdbool.h>
 #define MAX_SIZE 5
 
 // Global variables for time tracking
@@ -19,8 +20,14 @@ uint32_t third_delta = 0;
 int bit_count = 0;
 int valid_read_rate = 0;
 uint32_t avg_read_rate = 0;
-    int bits[44];
-
+int* bits = NULL;
+char* buf = NULL;
+char* recv = NULL;
+int* bin = NULL;
+struct thread_stuff{
+	int pi_thread;
+};
+bool thread_term=false;
 //Method to convert characters to an 'array' of their binary ASCII values
 void strToBin(int *bin_arr, int bin_size, size_t const size, void const * const ptr)
 {
@@ -121,12 +128,13 @@ void gpio_state_change_callback(int pi, unsigned gpio, unsigned level, uint32_t 
         if (delta >= lower_bound && delta <= upper_bound) {
             // Valid bit received within the acceptable timing range
             last_tick = tick;
-            //printf("Valid bit received with delta: %u microseconds\n", delta);
+            printf("Valid bit received with delta: %u microseconds\n", delta);
 	    bits[bit_count-5]=level;
+	    printf("Received bit: %d at index %d\n", level, bit_count-5);
 	    bit_count++;
         } else {
             // Ignore invalid transitions
-            //printf("Invalid bit received (outside timing window) with delta: %u microseconds\n", delta);
+            printf("Invalid bit received (outside timing window) with delta: %u microseconds\n", delta);
 
 
         }
@@ -152,8 +160,7 @@ void sendManchesterEncodedBit(int pi, int gpio, int bit) {
 }
 
 // Function to send a Manchester-encoded message
-void sendFunction(int bits[], int sObits) {
-    int pi = pigpio_start(NULL, NULL);
+void sendFunction(int pi, int* bits, int sObits) {
     set_mode(pi, 23, PI_OUTPUT);  // GPIO 23 used for transmitting data
 
     for (int i = 0; i < sObits; i++) {
@@ -165,26 +172,27 @@ void sendFunction(int bits[], int sObits) {
     uint32_t current_tick = get_current_tick(pi);  // Get the current tick in microseconds
     printf("Message sent at tick: %u microseconds\n", current_tick);
 
-    pigpio_stop(pi);  // Stop pigpio
 }
 
 // Listener function to detect Manchester-encoded messages (receiver)
-void *listen(void *arg) {
-    int pi = pigpio_start(NULL, NULL);
-    set_mode(pi, 26, PI_INPUT);  // GPIO 26 used for receiving data
+void *listen(void* i) {
+    struct thread_stuff *data=(struct thread_stuff*) i;
+    set_mode(data->pi_thread, 26, PI_INPUT);  // GPIO 26 used for receiving data
 
     // Set up the callback on GPIO 26 to trigger on both rising and falling edges
-    callback(pi, 26, EITHER_EDGE, gpio_state_change_callback);
+    callback(data->pi_thread, 26, EITHER_EDGE, gpio_state_change_callback);
 
     printf("Listening for Manchester-encoded message on GPIO 26...\n");
     
     // Keep the program running to process callbacks
     while (1) {
         time_sleep(1);  // Sleep to keep the listener active
+	if(thread_term){
+		pthread_exit((void *)1);
     }
 
-    pigpio_stop(pi);  // Stop pigpio
     return NULL;
+}
 }
 // Function to add a parity bit to the given message
 // Even 1s
@@ -228,9 +236,8 @@ else{
 
 
 // Function to initialize the GPIO pins and regularize them
-void regularize() {
+void regularize(int pi) {
     // Initialize pigpio library and GPIO pins
-    int pi = pigpio_start(NULL, NULL);
 
     set_mode(pi, 23, PI_OUTPUT);  // GPIO 23 as output (transmitter)
     set_mode(pi, 26, PI_INPUT);   // GPIO 26 as input (receiver)
@@ -239,81 +246,98 @@ void regularize() {
     gpio_write(pi, 23, 1);
     gpio_write(pi, 23, 0);
 
-    pigpio_stop(pi);  // Stop pigpio
 }
 
-// Function to stop a thread
-void stop_thread(pthread_t *pth) {
-    pthread_cancel(*pth);  // Cancels the thread
-    pthread_join(*pth, NULL);  // Waits for the thread to terminate
-}
 
 int main(int argc, char *argv[]) {  
-    
-    regularize();  // Regularize GPIO pins before sending
+    int pi = pigpio_start(NULL, NULL);
+    struct thread_stuff data;
+    data.pi_thread = pi;
+    regularize(pi);  // Regularize GPIO pins before sending
     time_sleep(2);
     pthread_t listener_thread;
 
     // Start listener thread to listen for Manchester-encoded messages on GPIO 26
-    if (pthread_create(&listener_thread, NULL, listen, NULL)) {
+    if (pthread_create(&listener_thread, NULL, listen,(void *) &data)) {
         fprintf(stderr, "Error creating thread\n");
         return 1;
     }
     while(1){
+    bits = calloc(MAX_SIZE * 8, sizeof(int));
     int head[] = {1, 0, 1, 0,1};   // Header for synchronization
-    //int biit[] = {1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1};  // Message to be sent
-    //int userInput[17]; //initialize input array
-    char buf[MAX_SIZE+1] = {};
-    char recv[MAX_SIZE] = {};
-    int bin[1+MAX_SIZE*8];
+    buf = calloc(MAX_SIZE + 1, sizeof(char));
+    recv = calloc(MAX_SIZE + 1, sizeof(char));
+    bin = calloc(MAX_SIZE * 8, sizeof(int));
+    if (!bits || !buf || !recv || !bin){
+	    printf("Memory failed\n");
+	    return 1;}
     int k = 0;
-    printf("\nEnter a string...\n");
-    fgets(buf, sizeof(buf)+2, stdin);
-    buf[MAX_SIZE] = '\0';
+    ssize_t bufsize = 0;
+    ssize_t input_size;
+
+
+    printf("\nEnter a string (no size limit, type 'exit' to quit):\n");
+    input_size = getline(&buf, &bufsize, stdin);  // Use getline for flexible input
+    
+    
+    
+    if(strncmp(buf, "exit", 4) == 0){
+	thread_term=true;
+    void *thread_return_value;
+    pthread_join(listener_thread, &thread_return_value);
+	    break;
+    }
+    //null terminating char
+   buf[input_size - 1] = '\0';
     printf("string is: %s", buf);
     for (k = 0; k < MAX_SIZE*8; k++) {
         bin[k] = 0;
     }
     printf("\nBinary is: ");
-    strToBin(bin, MAX_SIZE*8, MAX_SIZE, &buf);
+    strToBin(bin, MAX_SIZE*8, MAX_SIZE, buf);
     for (int k = 0; k < MAX_SIZE*8; k++) {
         printf("%d", bin[k]);
     }
-    /*
-    printf("Enter your desired bits (16 required) \n"); //prompt user
-    for(int i = 0; i < 16; i++){ //loop through each element of array, update with applicable bit
-    	scanf("%d", &userInput[i]);
-    }
-    */
     int sOhead = sizeof(head) / sizeof(head[0]);
     //int sObits = sizeof(biit) / sizeof(biit[0]);
-    int sObin = sizeof(bin) / sizeof(bin[0]);
+    int sObin = MAX_SIZE * 8;
     time_sleep(2);
     int *bin_arr = bin;
 
-    //time_sleep(1);
     // Send Manchester-encoded header and message
-    //int *ui_ptr = userInput;
-    add_parity_bit(bin_arr, sObin);
+    //add_parity_bit(bin_arr, sObin);
 
-    sendFunction(head, sOhead);
-    sendFunction(bin, sObin);
+    sendFunction(pi, head, sOhead);
+    sendFunction(pi, bin, sObin);
     time_sleep(5);
 
     // Stop listener thread after communication is done
-    //stop_thread(&listener_thread);
     int *bit_ptr = bits;
     int sOmess = sizeof(bits) / sizeof(bits[0]);
-    for(int loop = 0; loop < 21; loop++){
+    for(int loop = 0; loop < sObin; loop++){
       printf("%d ", bits[loop]);
     }
     printf("\n");
-    check_parity_bit(bit_ptr, sOmess);
+    //check_parity_bit(bit_ptr, sOmess);
     binToStr(bits, recv, MAX_SIZE);
+    printf("Received message: %s\n", recv);
     printf("\n");
     for (int m = 0; m < MAX_SIZE; m++) {
         printf("%c", recv[m]);
     }
-bit_count = 0;}
+    bit_count = 0;
+
+    free(bits);
+    free(buf);
+    free(recv);
+    free(bin);
+
+}
+    free(bits);
+    free(buf);
+    free(recv);
+    free(bin);
+    pigpio_stop(pi);
+    printf("stopped pigpio");
     return 0;
 }
