@@ -1,0 +1,44 @@
+%% Preamble stuff needed so that LaTeX can do the right thing
+\documentclass{article}
+\usepackage[a4paper, margin=1in]{geometry}
+\begin{document}
+%% Section enumerating upcoming tasks and task owners for roughly the next 24 hours
+\section*{Next Goals and Deliverables}
+\begin{itemize}
+\item Complete Dynamic Memory Allocation and Freeing - CLYK
+\item Complete Message Size Sending in Header - CLYK
+\item Re-implement Message Sending/Decoding Using Dynamic Memory Sizes - CLYK
+\item Chunk out our code into Functions and Perform Valgrind Unit Tests - CLYK
+
+\end{itemize}
+%% Section enumerating progress from the previous day. Items people were responsible for in the last progress report must appear. Additional tasks that the group agreed to add since the last progress report may be presented here.
+\section*{Previous Goals and Deliverables}
+\begin{itemize}
+\item Research Pathfinding Algorithms for Network (OSPF, DVR) - CLYK (in-progress)
+\item Research Addressing Protocols - CLYK (in-progress)
+\item Continued Research on Sending Packets. - CLYK (in-progress)
+\item Implement Pathfinding Algorithm - CLYK (deferred)
+\item Adding a 3rd or even 4th pi to the Testing Equations? - CLYK (deferred)
+\item Reformat our Header and Allocation Calls to Resize Based on Message Sizes - CLYK (in-progress) (NonWorkingTests/diddlyog.c)
+\item Use Dynamic Memory Allocation - CLYK (DONE) (LinkLayer/angrysalad.c)
+\item Upload Updated Progress Report (DONE) (Reports/ProgDay11.tex)
+\end{itemize}
+%% Sections above should be short bullets. Longer free form discussion of information from above goes here. These should still be short! More that a couple sentences and the discussion is better suited as a results write-up, appendix, or design document.
+\section*{Discussion}
+\begin{itemize}
+\item Research Pathfinding Algorithms for Network (OSPF, DVR) - Deferred until completion of link layer
+\item Continued Research Addressing Protocols - Deferred until completion of link layer
+\item Implement Pathfinding Algorithm. -  Deferred until completion of link layer
+\item Continued Research on Sending Packets - This research has lead us to spend most of our time on the final item in this list, reformatting our header based on the size of the outgoing message and allocation dynamically based on the size of the incoming message.
+\item Adding a 3rd or even 4th pi to the Testing Equations? -  Deferred until completion of link layer
+\item Reformat our Header and Allocation Calls to Resize Based on Message Sizes - Our header now consists of a timing adjustment portion and a size portion. The length of the message is encoded and decoded from integer to binary and back so the appropriate amount of memory can be allocated.
+\item Use Dynamic Memory Allocation - Changed over from static 'array' allocations to malloc calls, allowing us to free allocated memory
+\end{itemize}
+%% The appendix pages go here if there are any...
+%\section*{Appendix}
+%\begin{itemize}
+%\item OSPF https://en.wikipedia.org/wiki/Open\_Shortest\_Path\_First
+%\item DVR https://www.geeksforgeeks.org/distance-vector-routing-dvr-protocol/
+%\item CIDR https://en.wikipedia.org/wiki/Classless\_Inter-Domain\_Routing
+%\end{itemize}
+\end{document}
