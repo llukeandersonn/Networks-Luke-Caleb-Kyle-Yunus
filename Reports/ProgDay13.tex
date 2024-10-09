@@ -1,0 +1,46 @@
+%% Preamble stuff needed so that LaTeX can do the right thing
+\documentclass{article}
+\usepackage[a4paper, margin=1in]{geometry}
+\begin{document}
+%% Section enumerating upcoming tasks and task owners for roughly the next 24 hours
+\section*{Next Goals and Deliverables}
+\begin{itemize}
+\item Add a thread for sending messages - CLYK (expected completion by 10/10)
+\item Complete link layer with simultaneous sending and receiving messages through multithreading - CLYK (expected completion by 10/10)
+
+
+\end{itemize}
+%% Section enumerating progress from the previous day. Items people were responsible for in the last progress report must appear. Additional tasks that the group agreed to add since the last progress report may be presented here.
+\section*{Previous Goals and Deliverables}
+\begin{itemize}
+\item Final Paper - CLYK (in-progress)
+\item Research Pathfinding Algorithms for Network (OSPF, DVR) - CLYK (in-progress)
+\item Research Addressing Protocols - CLYK (in-progress)
+\item Continued Research on Sending Packets. - CLYK (in-progress)
+\item Implement Pathfinding Algorithm - CLYK (deferred)
+\item Adding a 3rd or even 4th pi to the Testing Equations? - CLYK (deferred)
+\item Reformat our Header and Allocation Calls to Resize Based on Message Sizes - CLYK (in-progress) (NonWorkingTests/diddlyog.c)
+\item Complete Dynamic Memory Allocation and Freeing - CLYK (In - Progress)
+\item Complete Message Size Sending in Header - CLYK (Deferred, possibly canceled)
+\item Re-implement Message Sending/Decoding Using Dynamic Memory Sizes - CLYK (In - Progress)
+\item Chunk out our code into Functions and Perform Valgrind Unit Tests - CLYK (DONEish)
+
+\item Upload Updated Progress Report (DONE) (Reports/ProgDay13.tex)
+\end{itemize}
+%% Sections above should be short bullets. Longer free form discussion of information from above goes here. These should still be short! More that a couple sentences and the discussion is better suited as a results write-up, appendix, or design document.
+\section*{Discussion}
+\begin{itemize}
+\item Complete Message Size Sending in Header - Might have to move forward with no dynamic message sending, and just go with hardcoded limited message size which seems reasonable as long as we have a reasonably large message limit with decently implemented code for user ease. We want to move on to network layer ASAP so some cutting on the link layer where possible is needed, so this might be what we decide to do. Possible we have already figured out something to fix this issue though as we managed to get to 0 memory leaks and the last one did have relation to our message limit (our buf variable being allocated via getline instead of calloc like the others) so we will have to see how we progress.
+\item Complete Dynamic Memory Allocation and Freeing - We technically did finish this as we got to 0 memory leaks on a previous version, however in trying to implement asynchronous messaging and dynamic message sizes we were faced with more issues as we also tried to incorporate a new sender thread to achieve all this. This has of course resulted in more new memory allocation issues that we are trying to make progress on. 
+\item Re-Implement message sending/decoding using dynamic memory sizes, in finding our last memory leaks cause we did notice that we might be able to find a solution to our dynamic message size issue as well. It seems like getline already automatically allocated for our buf variable which is related to the output message size. Memory allocation and threading issues causing us some trouble here though so we will have to see.
+\item Anything related to network layer like research or algorithm implementations - Tough. We are dealing with some link layer issues, hopeful they will be solved promptly and we will make quick progress on the next layer, but as of now it's hard to get anything started without having a more firm foundation for our link layer. 
+\item Final Paper - Started an overleaf page and shared with all members, discussing how we plan to move forward with getting started on this paper, but that is all for now.
+\end{itemize}
+%% The appendix pages go here if there are any...
+%\section*{Appendix}
+%\begin{itemize}
+%\item OSPF https://en.wikipedia.org/wiki/Open\_Shortest\_Path\_First
+%\item DVR https://www.geeksforgeeks.org/distance-vector-routing-dvr-protocol/
+%\item CIDR https://en.wikipedia.org/wiki/Classless\_Inter-Domain\_Routing
+%\end{itemize}
+\end{document}
