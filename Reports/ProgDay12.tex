@@ -1,0 +1,44 @@
+%% Preamble stuff needed so that LaTeX can do the right thing
+\documentclass{article}
+\usepackage[a4paper, margin=1in]{geometry}
+\begin{document}
+%% Section enumerating upcoming tasks and task owners for roughly the next 24 hours
+\section*{Next Goals and Deliverables}
+\begin{itemize}
+\item Add a thread for sending messages - CLYK (expected completion by 10/9)
+\item Complete link layer with simultaneous sending and receiving messages through multithreading - CLYK (expected completion by 10/10)
+
+
+\end{itemize}
+%% Section enumerating progress from the previous day. Items people were responsible for in the last progress report must appear. Additional tasks that the group agreed to add since the last progress report may be presented here.
+\section*{Previous Goals and Deliverables}
+\begin{itemize}
+\item Research Pathfinding Algorithms for Network (OSPF, DVR) - CLYK (in-progress)
+\item Research Addressing Protocols - CLYK (in-progress)
+\item Continued Research on Sending Packets. - CLYK (in-progress)
+\item Implement Pathfinding Algorithm - CLYK (deferred)
+\item Adding a 3rd or even 4th pi to the Testing Equations? - CLYK (deferred)
+\item Reformat our Header and Allocation Calls to Resize Based on Message Sizes - CLYK (in-progress) (NonWorkingTests/diddlyog.c)
+\item Complete Dynamic Memory Allocation and Freeing - CLYK
+\item Complete Message Size Sending in Header - CLYK
+\item Re-implement Message Sending/Decoding Using Dynamic Memory Sizes - CLYK
+\item Chunk out our code into Functions and Perform Valgrind Unit Tests - CLYK
+
+\item Upload Updated Progress Report (DONE) (Reports/ProgDay12.tex)
+\end{itemize}
+%% Sections above should be short bullets. Longer free form discussion of information from above goes here. These should still be short! More that a couple sentences and the discussion is better suited as a results write-up, appendix, or design document.
+\section*{Discussion}
+\begin{itemize}
+\item Thread for sending messages - is needed because our program currently requires messages to be sent at the same time to function properly. A thread will help resolve this because then the logic will be taken out of our main while loop and implemented as a thread that can access the memory.
+\item Completion of the link layer with multithreading - will be an important milestone. We will need to implement logic for locking and unlocking the threads using mutex calls to ensure the memory is being accessed properly. 
+\item Adding an incoming message size marker in our header will allow us to dynamically allocate the correct amount of memory for an incoming message. This will help optimize our program so that we are not allocating more memory than necessary.
+\item Complete dynamic memory allocation and freeing - currently in progress. We have heavily minimized memory leaks within our program with few left to address.
+\end{itemize}
+%% The appendix pages go here if there are any...
+%\section*{Appendix}
+%\begin{itemize}
+%\item OSPF https://en.wikipedia.org/wiki/Open\_Shortest\_Path\_First
+%\item DVR https://www.geeksforgeeks.org/distance-vector-routing-dvr-protocol/
+%\item CIDR https://en.wikipedia.org/wiki/Classless\_Inter-Domain\_Routing
+%\end{itemize}
+\end{document}
