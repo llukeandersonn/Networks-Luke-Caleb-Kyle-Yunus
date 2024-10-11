@@ -1,0 +1,43 @@
+%% Preamble stuff needed so that LaTeX can do the right thing
+\documentclass{article}
+\usepackage[a4paper, margin=1in]{geometry}
+\begin{document}
+%% Section enumerating upcoming tasks and task owners for roughly the next 24 hours
+\section*{Next Goals and Deliverables}
+\begin{itemize}
+\item Continue to work on final paper (CLYK)
+\item Add in third RPi to chat application (CLYK)
+
+\end{itemize}
+%% Section enumerating progress from the previous day. Items people were responsible for in the last progress report must appear. Additional tasks that the group agreed to add since the last progress report may be presented here.
+\section*{Previous Goals and Deliverables}
+\begin{itemize}
+\item Final Paper - CLYK (in-progress)
+\item Adding a 3rd pi to the Testing Equations? - CLYK (deferred until threading complete)
+\item Reformat our Header and Allocation Calls to Resize Based on Message Sizes - CLYK (in-progress) (NonWorkingTests/diddlyog.c)
+\item Complete Dynamic Memory Allocation and Freeing - CLYK (In - Progress)
+\item Chunk out our code into Functions and Perform Valgrind Unit Tests - CLYK (DONEish)
+\item Add a thread for sending messages - CLYKexpected (expected completion by 10/10)
+\item Complete link layer with simultaneous sending and receiving messages through multithreading - CLYK (expected completion by 10/10)
+
+\item Upload Updated Progress Report (DONE) (Reports/ProgDay14.tex)
+\end{itemize}
+%% Sections above should be short bullets. Longer free form discussion of information from above goes here. These should still be short! More that a couple sentences and the discussion is better suited as a results write-up, appendix, or design document.
+\section*{Discussion}
+\begin{itemize}
+\item Final Paper - We've fleshed out an outline for each of our sections and populated our introduction
+\item Adding a 3rd pi to the Testing Equations? - This goal will allow for chat between three distinct machines, ideally with both a private message and broadcast system, but time constraints will be our greatest enemy in this aspect.
+\item Reformat our Header and Allocation Calls to Resize Based on Message Sizes - Excepting the header portion of this goal, we're able to dynamically process any number of characters up to 50 bytes
+\item Complete Dynamic Memory Allocation and Freeing - Down to 1 (yay!) memory leak!
+\item Chunk out our code into Functions and Perform Valgrind Unit Tests - Related to above, portioning up our code in order to find the origin of leaks allowed us to track down our leaks
+\item Add a thread for sending messages - Thread is implemented and causes a few issues with the receiving side, but generally works well for quickly chatting between machines.
+\item Complete link layer with simultaneous sending and receiving messages through multithreading - Related to above, multithreading has been completed but some bugs need ironed out before a true Link Layer victory can officially be declared. Although we have achieve a version that allows for asynchronous message sending, so Link Layer victory is arguably achieved. 
+\end{itemize}
+%% The appendix pages go here if there are any...
+%\section*{Appendix}
+%\begin{itemize}
+%\item OSPF https://en.wikipedia.org/wiki/Open\_Shortest\_Path\_First
+%\item DVR https://www.geeksforgeeks.org/distance-vector-routing-dvr-protocol/
+%\item CIDR https://en.wikipedia.org/wiki/Classless\_Inter-Domain\_Routing
+%\end{itemize}
+\end{document}
