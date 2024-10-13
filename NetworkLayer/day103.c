@@ -320,9 +320,9 @@ void gpio_state_change_callback(int pi, unsigned gpio, unsigned level, uint32_t 
     printf("size of bits %d\n", sObits);
 
     printf("\n ---we are just before the call to join forward_thread--- \n"); 
-   // pthread_join(forward_thread, &thread_return_value);
+   pthread_join(forward_thread, &thread_return_value);
   
-    sleep(10);
+    //sleep(10);
     printf("\n ---we have joined forward thread--- \n");
     printf("made it to end");
    //wait before freeing for threa dot exit
