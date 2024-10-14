@@ -1,0 +1,27 @@
+%% Preamble stuff needed so that LaTeX can do the right thing
+\documentclass{article}
+\usepackage[a4paper, margin=1in]{geometry}
+\begin{document}
+%% Section enumerating upcoming tasks and task owners for roughly the next 24 hours
+\section*{Next Goals and Deliverables}
+\begin{itemize}
+\item Complete Final Paper - CLYK
+\item Perform testing/debugging on 3+ RPis - CLYK
+\item Implement a file transfer application? - CLYK
+\end{itemize}
+%% Section enumerating progress from the previous day. Items people were responsible for in the last progress report must appear. Additional tasks that the group agreed to add since the last progress report may be presented here.
+\section*{Previous Goals and Deliverables}
+\begin{itemize}
+\item Final Paper - CLYK (in-progress)
+\item Adding a 3rd Pi to the Testing Equations? - CLYK (DONE)
+\item Implement a file transfer application? - CLYK 
+
+\item Upload Updated Progress Report (DONE) (Reports/ProgDay15.tex)
+\end{itemize}
+%% Sections above should be short bullets. Longer free form discussion of information from above goes here. These should still be short! More that a couple sentences and the discussion is better suited as a results write-up, appendix, or design document.
+\section*{Discussion}
+\begin{itemize}
+\item Final Paper - Our Abstract, Introduction, and Approach sections are all populated with mostly complete information. Our Link and Application layer sections are next.
+\item Adding a 3rd Pi to the Testing Equations - We've successfully implemented a network layer which should handle messaging between up to 10 Raspberry Pis, though our testing has so far proven it working with 3. Chats can be sent to any of 10 addresses within the network in a ring topology, allowing for the forwarding of messages when they arrive at the incorrect machine. We have also implemented some user friendly features that will allow for a more comprehensive network layer such as a "from" address that accompanies each message. 
+\end{itemize}
+\end{document}
