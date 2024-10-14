@@ -30,7 +30,7 @@ int* in_address;
 int* from_address;
 int* out_address;
 int address;
-int in_type;
+int* ptr;
 char* out_add_char;
 bool file;
 int forward = 0;
@@ -289,9 +289,11 @@ void gpio_state_change_callback(int pi, unsigned gpio, unsigned level, uint32_t 
 
         if (delta >= lower_bound && delta <= upper_bound) {
 		
+		pthread_mutex_unlock(&mutex);    
             last_tick = tick;
-	      int in_type =level;
-           if(in_type==1){
+	    ptr = calloc(1, sizeof(int));
+	    *ptr=level;
+           if(*ptr==1){
                 file=false;
 
             }else{
@@ -335,7 +337,7 @@ void gpio_state_change_callback(int pi, unsigned gpio, unsigned level, uint32_t 
             //TODO: ensure this 37 is correct
         	int sObits = bit_count-38;
    	        //printf("size of bits %d\n", sObits);
-	//	printf("\n ---we have entered the forwarding process---\n");
+		printf("\n ---we have entered the forwarding process---\n");
 		pthread_mutex_unlock(&mutex);    
                 pthread_t forward_thread;
                 struct send_stuff *fdata = (struct send_stuff*)calloc(1, sizeof(struct send_stuff));
@@ -344,7 +346,8 @@ void gpio_state_change_callback(int pi, unsigned gpio, unsigned level, uint32_t 
                 fdata->msg = bits;
 		fdata->size = sObits;
 		fdata->our_address = from_address;
-        fdata->type=&in_type;
+		printf("%d", *ptr);
+        	fdata->type=ptr;
 	    
     if (pthread_create(&forward_thread, NULL, oursend,(void *) fdata)) {
         fprintf(stderr, "Error creating thread\n");
@@ -366,6 +369,7 @@ void gpio_state_change_callback(int pi, unsigned gpio, unsigned level, uint32_t 
    //wait before freeing for threa dot exit
     if(bits != NULL){
     free(fdata);
+    free(ptr);
     }
            }
 
