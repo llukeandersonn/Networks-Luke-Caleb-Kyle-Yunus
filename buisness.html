@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map with VIIRS and Multi-Business Layers</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol/ol.css">
+    <script src="https://cdn.jsdelivr.net/npm/ol@v10.1.0/dist/ol.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        #map {
+            height: 1000px;
+            width: 100%;
+        }
+
+        .ol-popup {
+            position: absolute;
+            background-color: white;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            bottom: 12px;
+            left: -50px;
+            min-width: 250px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        }
+
+        .ol-toggle {
+            background-color: white;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            padding: 5px 10px;
+            margin: 5px;
+        }
+
+        .controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    background: white;
+    padding: 10px;
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    height: 200px; /* Fixed height for scrolling */
+    width: 200px;
+    overflow-y: auto; /* Enables vertical scrolling */
+}
+
+
+    </style>
+</head>
+<body>
+    <h1>Map with VIIRS and Multi-Business Layers</h1>
+    <div id="map"></div>
+    <div class="controls"></div>
+    <div id="businessMenu" style="display: none; position: absolute; bottom: 10px; right: 10px; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 4px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);">
+        <button id="addBusinessButton">Add a Business</button>
+    </div>
+    <div id="menu" style="display: none; position: absolute; bottom: 10px; right: 10px; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 4px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);">
+        <p><strong>Options</strong></p>
+        <button id="downloadBusiness">Download Business</button>
+        <button id="setThreshhold">Set Threshhold</button>
+    </div>
+    <div id="customizeBusinessMenu" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border: 1px solid #ccc; padding: 20px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2); width: 500px; z-index: 1000;">
+        <h3>Customize Business</h3>
+        <form id="businessForm" style="display: flex; flex-wrap: wrap; gap: 10px;">
+            <!-- Dynamic fields will be added here -->
+        </form>
+        <div style="margin-top: 20px; text-align: right;">
+            <button id="saveBusinessButton">Save Business</button>
+            <button id="cancelBusinessButton" type="button">Cancel</button>
+        </div>
+    </div>
+    
+    
+    
+
+    <script>
+        const BUSINESS_ZOOM_THRESHOLD = 13.5;
+        const businessCategories = [
+    'FID', 'ESRI_PID', 'CONAME', 'STREET', 'CITY', 'STATE', 'STATE_NAME', 
+    'ZIP', 'ZIP4', 'SIC_ALL', 'SIC', 'NAICS_ALL', 'NAICS', 'SALESVOL', 
+    'EMPNUM', 'PLACETYPE', 'HQNAME', 'SQFOOTAGE', 'MIN_SQFT', 'MAX_SQFT', 
+    'AFFILIATE', 'BRAND', 'LOC_CONF', 'SOURCE', 'RASTERVALU'
+];
+        let lastClickedFeature = null;
+        let lastClickCoords = null; // Store last clicked coordinates
+        const map = new ol.Map({
+            target: 'map',
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM()
+                })
+            ],
+            view: new ol.View({
+                center: ol.proj.fromLonLat([-104.7821, 38.901]), // Colorado center
+                zoom: 11
+            })
+        });
+        map.getView().on('change:resolution', updateLayerVisibility);
+        
+        
+        
+// Initialize DragBox
+const dragBox = new ol.interaction.DragBox({
+            condition: ol.events.condition.platformModifierKeyOnly, // Control or Command key
+            style: new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'rgba(255, 0, 0, 1)', // Red border
+                    width: 2
+                }),
+                fill: new ol.style.Fill({
+                    color: 'rgba(255, 0, 0, 0.3)' // Transparent red fill
+                })
+            })
+        });
+        map.addInteraction(dragBox);
+
+        // Reference to the menu container
+        const menu = document.getElementById('menu');
+        const downloadBusinessButton = document.getElementById('downloadBusiness');
+
+        // Store selected features globally
+        let selectedFeatures = [];
+
+        // Handle DragBox `boxend` event
+        dragBox.on('boxend', function () {
+    const extent = dragBox.getGeometry().getExtent();
+
+    // Collect business features within the box
+    selectedFeatures = [];
+    map.getLayers().forEach(layer => {
+        if (layer instanceof ol.layer.Vector && layer.get('isBusinessLayer') && layer.getVisible()) {
+            layer.getSource().forEachFeatureIntersectingExtent(extent, feature => {
+                const { geometry, ...properties } = feature.getProperties();
+                selectedFeatures.push(properties);
+            });
+        }
+    });
+
+    // Show the menu if features are selected
+        menu.style.display = 'block'; // Show the menu
+    
+});
+const businessSource = new ol.source.Vector();
+
+
+// Initialize a global business layer
+const businessLayer = new ol.layer.Vector({
+    source: businessSource,
+    style: new ol.style.Style({
+        image: new ol.style.Circle({
+            radius: 5,
+            fill: new ol.style.Fill({ color: 'blue' }),
+            stroke: new ol.style.Stroke({ color: 'white', width: 1 })
+        })
+    })
+});
+
+// Set a higher z-index for the business layer
+businessLayer.setZIndex(10);
+
+// Add the business layer to the map (after other layers)
+map.addLayer(businessLayer);
+
+
+
+        // Handle "Download Business" button click
+        downloadBusinessButton.addEventListener('click', function () {
+            if (selectedFeatures.length > 0) {
+                exportToCSV(selectedFeatures, 'business_output.csv');
+                alert('CSV file created with selected business features.');
+                menu.style.display = 'none'; // Hide the menu after download
+            } else {
+                alert('No business features to download.');
+            }
+        });
+
+        // Handle map clicks to hide the menu
+        map.on('singleclick', function () {
+            menu.style.display = 'none'; // Hide the menu
+        });
+
+        // Prevent menu from disappearing if clicked directly
+        menu.addEventListener('click', function (event) {
+            event.stopPropagation(); // Stops the event from propagating to the map
+        });
+
+        function exportToCSV(data, filename) {
+    if (data.length === 0) {
+        console.error('No data to export.');
+        return;
+    }
+
+    // Step 1: Parse data for new types and create a unified structure
+    const parsedData = data.map(row => {
+        const parsedRow = {};
+        for (const [key, value] of Object.entries(row)) {
+            // Check if the value contains a data type pattern (e.g., ESRI_PID:...)
+            const match = /^([\w_]+):"?(.*?)"?$/.exec(value);
+            if (match) {
+                const [, dataType, dataValue] = match;
+                parsedRow[dataType] = dataValue; // Add new type as a column
+            } else {
+                parsedRow[key] = value; // Retain existing key-value pairs
+            }
+        }
+        return parsedRow;
+    });
+
+    // Step 2: Extract all unique keys (columns) from the parsed data
+    const headers = Array.from(new Set(parsedData.flatMap(row => Object.keys(row))));
+
+    // Step 3: Build CSV rows with aligned columns
+    const csvContent = [
+        headers.join(','), // Add column headers
+        ...parsedData.map(row =>
+            headers.map(header =>
+                row[header] !== undefined 
+                    ? formatCSVValue(row[header]) // Format values to handle quotes and multiple attributes
+                    : '' // Add blank if missing
+            ).join(',') // Join values for a row
+        )
+    ].join('\n'); // Join rows
+
+    // Step 4: Create a Blob for the CSV and trigger download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+function formatCSVValue(value) {
+    // Convert value to string if it's not already
+    const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
+
+    const regex = /"(.*?)"/g;
+
+    // Replace matched segments by removing commas only in the center of the quotes and replacing them with spaces
+    const result = stringValue.replace(regex, (match) => {
+        return match.replace(/,/g, ' ');
+    });
+
+    return result;
+}
+
+
+
+
+
+
+
+
+
+
+
+        const popupContainer = document.createElement('div');
+        popupContainer.className = 'ol-popup';
+        document.body.appendChild(popupContainer);
+
+        const overlay = new ol.Overlay({
+            element: popupContainer,
+            positioning: 'bottom-center',
+            stopEvent: false,
+            offset: [0, -10]
+        });
+        map.addOverlay(overlay);
+
+        let lastClickedCoordinates = null;
+
+map.on('singleclick', function (event) {
+    lastClickedCoordinates = event.coordinate;
+    const [lon, lat] = ol.proj.toLonLat(lastClickedCoordinates);
+    console.log(`Last clicked location: Longitude: ${lon}, Latitude: ${lat}`);
+});
+
+
+        function loadViirsData(fileName) {
+    const vectorSource = new ol.source.Vector();
+    const vectorLayer = new ol.layer.Vector({
+        source: vectorSource,
+        visible: true // Initially visible
+    });
+    vectorLayer.set('userVisible', true); // Default to visible
+
+    map.addLayer(vectorLayer);
+
+    fetch(fileName)
+        .then(response => response.text())
+        .then(csvData => {
+            Papa.parse(csvData, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function (results) {
+                    const data = results.data;
+                    data.forEach(row => {
+                        const lng = parseFloat(row.POINT_X);
+                        const lat = parseFloat(row.POINT_Y);
+                        const value = parseFloat(row.grid_code);
+
+                        if (!isNaN(lat) && !isNaN(lng) && !isNaN(value)) {
+                            const squareCoords = createSquare(lat, lng, 0.00416); // Square size
+                            const squareFeature = new ol.Feature({
+    geometry: new ol.geom.Polygon([squareCoords.map(coord => ol.proj.fromLonLat([coord[0], coord[1]]))]),
+    id: row.pointid,
+    value: value,
+    properties: {
+        value: value,
+        isViirs: true // Tag as VIIRS feature
+    }
+});
+
+                            squareFeature.setStyle(new ol.style.Style({
+                                fill: new ol.style.Fill({
+                                    color: getColor(value) // Color based on value
+                                }),
+                                stroke: new ol.style.Stroke({
+                                    color: 'transparent',
+                                    width: 0
+                                })
+                            }));
+
+                            vectorSource.addFeature(squareFeature);
+                        }
+                    });
+                }
+            });
+        });
+
+    // Add a toggle control for the VIIRS layer
+    const controlsDiv = document.querySelector('.controls');
+    const control = document.createElement('div');
+    control.className = 'ol-toggle';
+    control.innerHTML = `
+        <label>
+            <input type="checkbox" checked />
+            VIIRS Data
+        </label>
+    `;
+
+    control.querySelector('input').addEventListener('change', function (event) {
+        const userVisible = event.target.checked;
+        vectorLayer.set('userVisible', userVisible); // Store user's choice
+        updateLayerVisibility(); // Update visibility based on new user selection
+    });
+
+    controlsDiv.appendChild(control);
+}
+
+
+function loadBusinessData(fileName, color, label) {
+    const businessSource = new ol.source.Vector();
+const businessLayer = new ol.layer.Vector({
+    source: businessSource,
+    style: new ol.style.Style({
+        image: new ol.style.Circle({
+            radius: 5,
+            fill: new ol.style.Fill({ color: 'blue' }),
+            stroke: new ol.style.Stroke({ color: 'white', width: 1 })
+        })
+    })
+});
+
+// Add the business layer to the map
+map.addLayer(businessLayer);
+
+    fetch(fileName)
+        .then(response => response.text())
+        .then(csvData => {
+            Papa.parse(csvData, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function (results) {
+                    const data = results.data;
+                    data.forEach(row => {
+                        const lng = parseFloat(row.POINT_X);
+                        const lat = parseFloat(row.POINT_Y);
+
+                        if (!isNaN(lat) && !isNaN(lng)) {
+                            const businessFeature = new ol.Feature({
+                                geometry: new ol.geom.Point(ol.proj.fromLonLat([lng, lat])),
+                                properties: {
+                                    ...row, // Include properties from the row
+                                    isBusiness: true // Tag as a business feature
+                                }
+                            });
+
+                            businessFeature.setStyle(new ol.style.Style({
+                                image: new ol.style.Circle({
+                                    radius: 5,
+                                    fill: new ol.style.Fill({ color: color }),
+                                    stroke: new ol.style.Stroke({ color: 'white', width: 1 })
+                                })
+                            }));
+
+                            businessSource.addFeature(businessFeature);
+                        }
+                    });
+                }
+            });
+        });
+
+    // Add a toggle control for the business layer
+    const controlsDiv = document.querySelector('.controls');
+    const control = document.createElement('div');
+    control.className = 'ol-toggle';
+    control.innerHTML = `
+        <label>
+            <input type="checkbox" checked />
+            ${label}
+        </label>
+    `;
+
+    control.querySelector('input').addEventListener('change', function (event) {
+        const userVisible = event.target.checked;
+        businessLayer.set('userVisible', userVisible); // Store user's choice
+        updateLayerVisibility(); // Update visibility based on new user selection
+    });
+
+    controlsDiv.appendChild(control);
+
+    // Add layer to zoom control logic
+    businessLayer.set('minZoom', BUSINESS_ZOOM_THRESHOLD);
+}
+
+function updateLayerVisibility() {
+    const currentZoom = map.getView().getZoom();
+    map.getLayers().forEach(layer => {
+        if (layer.get('userVisible') !== undefined) {
+            const userVisible = layer.get('userVisible'); // User's toggle preference
+            const zoomVisible = layer.get('minZoom') !== undefined ? currentZoom > layer.get('minZoom') : true; // No zoom constraint if `minZoom` not set
+            layer.setVisible(userVisible && zoomVisible); // Combine user toggle and zoom constraints
+        }
+    });
+}
+
+
+
+
+     // Reference to the business menu
+const businessMenu = document.getElementById('businessMenu');
+const addBusinessButton = document.getElementById('addBusinessButton');
+
+// Reference to the customization menu
+const customizeBusinessMenu = document.getElementById('customizeBusinessMenu');
+
+// Handle "Add a Business" button click
+addBusinessButton.addEventListener('click', function () {
+    // Hide the primary menu
+    businessMenu.style.display = 'none';
+
+    // Show the customization menu
+    customizeBusinessMenu.style.display = 'block';
+});
+// Reference to the form container
+const businessForm = document.getElementById('businessForm');
+
+// Generate form inputs dynamically
+businessCategories.forEach(category => {
+    const fieldContainer = document.createElement('div');
+    fieldContainer.style.flex = '1 1 45%'; // Take up 45% of the width for two columns with spacing
+    fieldContainer.style.minWidth = '200px'; // Minimum width for smaller screens
+
+    const label = document.createElement('label');
+    label.setAttribute('for', category);
+    label.textContent = `${category}:`;
+    label.style.display = 'block'; // Make the label appear above the input
+
+    const input = document.createElement('input');
+    input.setAttribute('type', 'text');
+    input.setAttribute('id', category);
+    input.setAttribute('name', category);
+    input.setAttribute('placeholder', `Enter ${category}`);
+    input.style.width = '100%'; // Ensure the input takes up the full width of its container
+
+    fieldContainer.appendChild(label);
+    fieldContainer.appendChild(input);
+
+    businessForm.appendChild(fieldContainer);
+});
+
+
+document.getElementById('saveBusinessButton').addEventListener('click', function () {
+    const businessData = {};
+
+    // Collect data from the form inputs
+    businessCategories.forEach(category => {
+        const value = document.getElementById(category).value;
+        businessData[category] = value || ""; // Allow empty fields, default to an empty string
+    });
+
+    // Use last clicked coordinates or default
+    const coordinates = lastClickedCoordinates
+        ? ol.proj.toLonLat(lastClickedCoordinates)
+        : [-104.7821, 38.901]; // Default coordinates if no last click
+
+    // Save POINT_X and POINT_Y
+    businessData.POINT_X = coordinates[0].toFixed(6); // Longitude
+    businessData.POINT_Y = coordinates[1].toFixed(6); // Latitude
+
+    const newBusinessFeature = new ol.Feature({
+        geometry: new ol.geom.Point(ol.proj.fromLonLat(coordinates)),
+        properties: { ...businessData, isBusiness: true }
+    });
+
+    // Style the new feature
+    newBusinessFeature.setStyle(new ol.style.Style({
+        image: new ol.style.Circle({
+            radius: 6,
+            fill: new ol.style.Fill({ color: 'green' }),
+            stroke: new ol.style.Stroke({ color: 'white', width: 2 })
+        })
+    }));
+
+    // Add the feature to the global business source
+    businessSource.addFeature(newBusinessFeature);
+
+    alert(`Business "${businessData.CONAME || 'Unnamed Business'}" has been added to the map at Longitude: ${businessData.POINT_X}, Latitude: ${businessData.POINT_Y}`);
+
+    // Hide the customization menu
+    customizeBusinessMenu.style.display = 'none';
+});
+
+
+document.getElementById('cancelBusinessButton').addEventListener('click', function () {
+    // Clear form inputs and hide the menu
+    businessCategories.forEach(category => {
+        document.getElementById(category).value = '';
+    });
+    customizeBusinessMenu.style.display = 'none';
+});
+
+
+
+
+
+
+map.on('singleclick', function (event) {
+    const feature = map.forEachFeatureAtPixel(event.pixel, function (feat) {
+        return feat;
+    });
+
+    const clickedCoordinate = event.coordinate;
+    const [lon, lat] = ol.proj.toLonLat(clickedCoordinate);
+    const formattedCoordinates = `Longitude: ${lon.toFixed(6)}, Latitude: ${lat.toFixed(6)}`;
+
+    // Check if the click is within 0.001 degrees of the last click
+    if (
+        lastClickCoords &&
+        Math.abs(lastClickCoords.lon - lon) < 0.001 &&
+        Math.abs(lastClickCoords.lat - lat) < 0.001 &&
+        !feature
+    ) {
+        // Hide popup and menu if clicking within 0.001 degrees of last click
+        overlay.setPosition(undefined);
+        popupContainer.innerHTML = '';
+        businessMenu.style.display = 'none';
+        lastClickCoords = null; // Reset last clicked coordinates
+        return;
+    }
+
+    if (feature) {
+        const properties = feature.get('properties') || {};
+        const isBusinessFeature = properties.isBusiness || false;
+        const isViirsFeature = properties.isViirs || false;
+
+        if (feature === lastClickedFeature) {
+            // Hide everything if the same feature is clicked twice
+            overlay.setPosition(undefined);
+            popupContainer.innerHTML = '';
+            businessMenu.style.display = 'none';
+            lastClickedFeature = null; // Reset last clicked feature
+        } else if (isBusinessFeature) {
+            // Show business feature details, hide the menu
+            businessMenu.style.display = 'none';
+            const content = `
+                ${Object.keys(properties)
+                    .filter(key => key !== 'isBusiness')
+                    .map(key => `<strong>${key}:</strong> ${properties[key]}`)
+                    .join('<br>')}
+            `;
+            overlay.setPosition(clickedCoordinate);
+            popupContainer.innerHTML = content;
+            lastClickedFeature = feature;
+        } else if (isViirsFeature) {
+            // Show VIIRS data, coordinates, and the Add Business menu
+            const content = `
+                ${Object.keys(properties)
+                    .filter(key => key !== 'isViirs')
+                    .map(key => `<strong>${key}:</strong> ${properties[key]}`)
+                    .join('<br>')}
+                <hr>
+                <strong>Coordinates:</strong><br>${formattedCoordinates}
+            `;
+            overlay.setPosition(clickedCoordinate);
+            popupContainer.innerHTML = content;
+
+            // Show the business menu
+            businessMenu.style.display = 'block';
+            businessMenu.style.bottom = '10px';
+            businessMenu.style.right = '10px';
+
+            lastClickedFeature = feature;
+        }
+    } else {
+        // Show the business menu for blank areas and display coordinates
+        businessMenu.style.display = 'block';
+        businessMenu.style.bottom = '10px';
+        businessMenu.style.right = '10px';
+
+        overlay.setPosition(clickedCoordinate);
+        popupContainer.innerHTML = `<strong>Coordinates:</strong><br>${formattedCoordinates}`;
+        lastClickedFeature = null;
+    }
+
+    // Update last clicked coordinates
+    lastClickCoords = { lon, lat };
+});
+
+
+
+
+
+        // Helper functions
+        function createSquare(centerLat, centerLng, size) {
+            const halfSize = size / 2;
+            return [
+                [centerLng - halfSize, centerLat - halfSize],
+                [centerLng + halfSize, centerLat - halfSize],
+                [centerLng + halfSize, centerLat + halfSize],
+                [centerLng - halfSize, centerLat + halfSize],
+                [centerLng - halfSize, centerLat - halfSize]
+            ];
+        }
+
+        function getColor(value) {
+            const normalized = value / 300; // Normalize the value to 0–1
+            const r = Math.round((255 - 255) * normalized + 255);
+            const g = Math.round((255 - 0) * (1 - normalized));
+            const b = Math.round((0 - 0) * normalized);
+            return `rgba(${r}, ${g}, ${b}, 0.7)`; // Return as RGBA
+        }
+        
+
+        // Load VIIRS data
+        loadViirsData('RasterXYCoords(in).csv');
+
+        // Load multiple business files
+        loadBusinessData('AutBus2023.csv', 'blue', 'Business Group 1');
+        
+        loadBusinessData('ConsBus2023.csv', 'red', 'Business Group 2');
+        loadBusinessData('GHHBus2023.csv', 'green', 'Business Group 3');
+    </script>
+</body>
+</html>
